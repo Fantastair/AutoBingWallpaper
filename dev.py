@@ -130,6 +130,12 @@ def app_command(
                     (f'命令 "{func_name}" 被用户中断', WARNING_STYLE),
                 )
                 sys.exit(1)
+            except Exception as e:
+                prints(
+                    (r"\[dev.py] ", TITLE_STYLE),
+                    (f'命令 "{func_name}" 运行失败，发生错误: {e}', ERROR_STYLE),
+                )
+                sys.exit(1)
 
             end_time = get_time_ns()
             prints(
@@ -213,19 +219,89 @@ def check():
 @app_command(app)
 def build():
     """构建项目"""
+    from utils.get_version import get_version
+
+    prints(
+        (r"\[dev.py] ", TITLE_STYLE),
+        ("准备元数据", NORMAL_STYLE),
+    )
+
+    version = get_version().split(".")
+    if len(version) < 3:
+        prints(
+            (r"\[dev.py] ", TITLE_STYLE),
+            ("版本号格式不正确，应该为 major.minor.patch", ERROR_STYLE),
+        )
+        raise ValueError("版本号格式不正确，应该为 major.minor.patch")
+
+    version_file_template = CWD / "version-file-template.txt"
+    version_file_content = version_file_template.read_text(encoding="utf-8").strip()
+    version_file_content = version_file_content.format(
+        major0=version[0],
+        major1=version[0],
+        minor0=version[1],
+        minor1=version[1],
+        patch0=version[2],
+        patch1=version[2],
+        version0=".".join(version),
+        version1=".".join(version),
+    )
+    version_file = CWD / "version-file.txt"
+    version_file.write_text(version_file_content, encoding="utf-8")
+
+    dist_dir = CWD / "dist"
+    if dist_dir.exists():
+        for file in dist_dir.iterdir():
+            if file.is_file():
+                file.unlink()
+
     prints(
         (r"\[pyinstaller] ", TITLE_STYLE),
         ("使用 PyInstaller 构建项目", NORMAL_STYLE),
     )
 
     try:
-        cmd_run(["uv", "run", "pyinstaller", "src/main.py", "-F"])
+        cmd_run(
+            [
+                "uv",
+                "run",
+                "pyinstaller",
+                "-w",
+                "-F",
+                "--name",
+                "每日bing壁纸",
+                "-i",
+                "assets/icon.ico",
+                "src/main.py",
+                "--version-file",
+                "version-file.txt",
+            ]
+        )
     except subprocess.CalledProcessError as e:
         prints(
             (r"\[pyinstaller] ", TITLE_STYLE),
             ("项目构建失败，请检查错误信息", ERROR_STYLE),
         )
         raise e
+
+    if version_file.exists():
+        version_file.unlink()
+    if (CWD / "main.spec").exists():
+        (CWD / "main.spec").unlink()
+
+    exe = dist_dir / "每日bing壁纸.exe"
+    if exe.exists():
+        prints(
+            (r"\[dev.py] ", TITLE_STYLE),
+            ("项目构建成功，生成的可执行文件位于 ", NORMAL_STYLE),
+            (f"{exe}", INFO_STYLE),
+        )
+    else:
+        prints(
+            (r"\[dev.py] ", TITLE_STYLE),
+            ("项目构建失败，未找到生成的可执行文件", ERROR_STYLE),
+        )
+        raise FileNotFoundError("项目构建失败，未找到生成的可执行文件")
 
 
 if __name__ == "__main__":
