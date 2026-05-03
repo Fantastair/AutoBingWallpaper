@@ -9,7 +9,7 @@ from pathlib import Path
 __all__ = ["get_version", "PYPROJECT_PATH"]
 
 CWD = Path(__file__).parent
-PYPROJECT_PATH = CWD.parent.parent / "pyproject.toml"
+PYPROJECT_PATH = CWD.parent / "pyproject.toml"
 
 
 def get_version() -> str:
