@@ -1,0 +1,9 @@
+repos:
+  - repo: local
+    hooks:
+      - id: dev-check
+        name: Run dev.py check
+        entry: uv run dev.py check
+        language: system
+        pass_filenames: false
+        types: [python]
