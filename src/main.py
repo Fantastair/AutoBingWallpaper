@@ -1,13 +1,13 @@
 """主文件"""
 
-import os
 import ctypes
-import tempfile
+from pathlib import Path
 
 import requests
 
 BASE_URL = "https://cn.bing.com"
 API_URL = "https://global.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1&uhd=1&uhdwidth=3840&uhdheight=2160&setmkt=zh-CN&setlang=en"
+IMG_TEMP_PATH = Path(__file__).parent / "temp_wallpaper.jpg"
 
 
 def download_wallpaper() -> bytes | None:
@@ -37,15 +37,11 @@ def download_wallpaper() -> bytes | None:
 
 def set_wallpaper(wallpaper_bytes: bytes):
     """设置壁纸"""
-    with tempfile.NamedTemporaryFile(suffix=".jpg", delete=False) as tmp_file:
-        tmp_file.write(wallpaper_bytes)
-        tmp_file.flush()
-        tmp_file_path = tmp_file.name
+    with IMG_TEMP_PATH.open("wb") as f:
+        f.write(wallpaper_bytes)
+    tmp_file_path = str(IMG_TEMP_PATH.resolve())
 
     ctypes.windll.user32.SystemParametersInfoW(0x0014, 0, tmp_file_path, 3)
-
-    if os.path.exists(tmp_file_path):
-        os.remove(tmp_file_path)
 
 
 if __name__ == "__main__":
