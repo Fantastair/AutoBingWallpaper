@@ -1,5 +1,6 @@
 """主文件"""
 
+import sys
 import ctypes
 from pathlib import Path
 
@@ -7,7 +8,13 @@ import requests
 
 BASE_URL = "https://cn.bing.com"
 API_URL = "https://global.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1&uhd=1&uhdwidth=3840&uhdheight=2160&setmkt=zh-CN&setlang=en"
-IMG_TEMP_PATH = Path(__file__).parent / "temp_wallpaper.jpg"
+
+if getattr(sys, "frozen", False):
+    BASE_DIR = Path(sys.executable).parent
+else:
+    BASE_DIR = Path(__file__).parent
+
+IMG_TEMP_PATH = BASE_DIR / "temp_wallpaper.jpg"
 
 
 def download_wallpaper() -> bytes | None:

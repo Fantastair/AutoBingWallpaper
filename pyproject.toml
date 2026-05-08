@@ -1,6 +1,6 @@
 [project]
 name = "AutoBingWallpaper"
-version = "1.0.1"
+version = "1.0.2"
 description = "BingWallpaper的轻量实现"
 readme = "README.md"
 requires-python = ">=3.12"
