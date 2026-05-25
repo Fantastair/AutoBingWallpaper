@@ -1,10 +1,19 @@
 # AutoBingWallpaper
 
-一个BingWallpaper的轻量实现。
+一个 BingWallpaper 的轻量实现，支持 **Windows** 和 **Linux**。
 
-我喜欢用BingWallpaper来设置我的桌面壁纸，BingWallpaper是一个非常好用的工具，可以自动下载Bing每天的壁纸并设置为桌面壁纸。缺点是软件本体比较臃肿，集成了一些我不想用的功能，而且这是后台常驻软件，然而壁纸切换只要一天一次，完全不需要常驻软件来实现。于是我打算自己实现一个轻量的BingWallpaper，功能就是每天下载Bing的壁纸并设置为桌面壁纸，开机启动后会自动退出。
+我喜欢用 BingWallpaper 来设置我的桌面壁纸，BingWallpaper 是一个非常好用的工具，可以自动下载 Bing 每天的壁纸并设置为桌面壁纸。缺点是软件本体比较臃肿，集成了一些我不想用的功能，而且这是后台常驻软件，然而壁纸切换只要一天一次，完全不需要常驻软件来实现。于是我打算自己实现一个轻量的 BingWallpaper，功能就是每天下载 Bing 的壁纸并设置为桌面壁纸，开机启动后会自动退出。
 
 ## ⚠️⚠️⚠️警告：该程序下载的图像仅能用作桌面壁纸，不可用于其他用途
+
+## 支持的平台
+
+| 平台 | 状态 |
+|------|------|
+| Windows 10/11 | ✅ 完全支持 |
+| Linux (GNOME / KDE / XFCE / Cinnamon / MATE / Budgie / Unity / i3) | ✅ 自动检测桌面环境 |
+
+> Linux 下的桌面环境通过 `XDG_CURRENT_DESKTOP` 环境变量自动检测，无需手动配置。
 
 ## 目录结构
 
@@ -177,11 +186,15 @@ uv run dev.py build
 
 ## 自动运行
 
-- 可以设为开机启动（程序切换完壁纸后就会退出，无后台驻留）：
+程序切换完壁纸后就会退出，无后台驻留。
+
+### Windows
+
+- **设为开机启动**：
 
   按下 `Win + R`，输入 `shell:startup`，回车，打开启动文件夹。将可执行文件的快捷方式放入该文件夹中即可。
 
-- 如果不是每天都开关机，可以使用 Windows 任务计划程序来设置每天自动运行：
+- **定时任务**（如果不是每天都开关机）：
 
   1. 打开任务计划程序：按下 `Win + S`，输入 `任务计划程序`，回车。
   2. 创建基本任务：在右侧操作栏中点击 `创建基本任务...`。
@@ -191,3 +204,37 @@ uv run dev.py build
   6. 选择操作：选择 `启动程序`，然后点击 `下一步`。
   7. 选择程序：点击 `浏览...`，找到项目的可执行文件，选择它，然后点击 `下一步`。
   8. 完成任务：检查任务的设置是否正确，然后点击 `完成`。
+
+### Linux
+
+- **设为开机启动（systemd 用户服务）**：
+
+  创建 `~/.config/systemd/user/autobingwallpaper.service`：
+
+  ```ini
+  [Unit]
+  Description=Auto Bing Wallpaper
+
+  [Service]
+  Type=oneshot
+  ExecStart=/usr/bin/python3 /path/to/AutoBingWallpaper/src/main.py
+
+  [Install]
+  WantedBy=default.target
+  ```
+
+  然后启用服务：
+
+  ```bash
+  systemctl --user enable autobingwallpaper.service
+  ```
+
+- **定时任务（cron）**：
+
+  使用 `crontab -e` 添加每天定时运行：
+
+  ```cron
+  0 9 * * * /usr/bin/python3 /path/to/AutoBingWallpaper/src/main.py
+  ```
+
+  上面配置表示每天 9:00 执行一次。
