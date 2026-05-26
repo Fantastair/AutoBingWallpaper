@@ -9,7 +9,7 @@
 ## 支持的平台
 
 | 平台 | 状态 |
-|------|------|
+| ---- | ---- |
 | Windows 10/11 | ✅ 完全支持 |
 | Linux (GNOME / KDE / XFCE / Cinnamon / MATE / Budgie / Unity / i3) | ✅ 自动检测桌面环境 |
 
