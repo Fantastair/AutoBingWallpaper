@@ -19,7 +19,8 @@
 
 ```.
 ├── assets                     # 资源文件夹
-│   └── icon.py                # 图标文件
+│   ├── icon.ico               # Windows 图标文件
+│   └── icon.svg               # Linux 图标文件
 │
 ├── src                        # 代码文件夹
 │   └── main.py                # 主文件
