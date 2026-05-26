@@ -18,23 +18,24 @@
 ## 目录结构
 
 ```.
-├── assets                     # 资源文件夹
-│   ├── icon.ico               # Windows 图标文件
-│   └── icon.svg               # Linux 图标文件
+├── assets                       # 资源文件夹
+│   ├── icon.ico                 # Windows 图标文件
+│   └── icon.svg                 # Linux 图标文件
 │
-├── src                        # 代码文件夹
-│   └── main.py                # 主文件
+├── src                          # 代码文件夹
+│   └── main.py                  # 主文件
 │
-├── utils                      # 工具文件夹
-│   └── get_version.py         # 获取版本号的工具文件
+├── utils                        # 工具文件夹
+│   └── get_version.py           # 获取版本号的工具文件
 │
-├── .gitignore                 # Git忽略文件
-├── .pre-commit-config.yaml    # pre-commit配置文件
-├── dev.py                     # 开发脚本，集成常用指令
-├── LICENSE                    # 许可证文件
-├── pyproject.toml             # Python项目配置文件
-├── README.md                  # 项目说明文件
-└── uv.lock                    # Python依赖锁文件
+├── .gitignore                   # Git忽略文件
+├── .pre-commit-config.yaml      # pre-commit配置文件
+├── dev.py                       # 开发脚本，集成常用指令
+├── LICENSE                      # 许可证文件
+├── pyproject.toml               # Python项目配置文件
+├── README.md                    # 项目说明文件
+├── uv.lock                      # Python依赖锁文件
+└── version-file-template.txt    # 版本文件模板
 ```
 
 ## 许可证
