@@ -3,8 +3,17 @@
 """
 
 import sys
-import subprocess
 import platform
+
+# Windows 控制台默认编码无法处理中文，设置 UTF-8 编码
+if sys.platform == "win32":
+    import os
+
+    os.system("chcp 65001 > nul")
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")  # type: ignore[union-attr]
+    sys.stderr.reconfigure(encoding="utf-8", errors="replace")  # type: ignore[union-attr]
+
+import subprocess
 from pathlib import Path
 from functools import wraps
 from time import perf_counter_ns as get_time_ns
