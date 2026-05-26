@@ -14,6 +14,9 @@ import rich.style
 import rich.console
 import typer
 
+from utils.get_version import get_version
+
+
 CWD = Path(__file__).parent
 CONSOLE = rich.console.Console()
 
@@ -310,6 +313,70 @@ def build():
             ("项目构建失败，未找到生成的可执行文件", ERROR_STYLE),
         )
         raise FileNotFoundError("项目构建失败，未找到生成的可执行文件")
+
+
+@app_command(app)
+def release():
+    """发布项目"""
+    version = get_version()
+    branch = f"release/v{version}"
+
+    prints(
+        (r"\[release] ", TITLE_STYLE),
+        ("准备发布 ", NORMAL_STYLE),
+        (f"v{version}", INFO_STYLE),
+    )
+    prints(
+        (r"\[release] ", TITLE_STYLE),
+        ("目标分支: ", NORMAL_STYLE),
+        (f"{branch}", DEBUG_STYLE),
+    )
+
+    # 检查是否有未提交的更改
+    status = cmd_run(["git", "status", "--porcelain"], capture_output=True)
+    if status:
+        prints(
+            (r"\[release] ", TITLE_STYLE),
+            ("工作区有未提交的更改，请先提交或暂存", WARNING_STYLE),
+        )
+        raise SystemExit(1)
+
+    # 检查远程分支是否已存在
+    remote_branches = cmd_run(
+        ["git", "ls-remote", "--heads", "origin", branch], capture_output=True
+    )
+    if branch in remote_branches:
+        prints(
+            (r"\[release] ", TITLE_STYLE),
+            (f"远程分支 {branch} 已存在", WARNING_STYLE),
+        )
+        if not typer.confirm("是否强制覆盖远程分支？"):
+            prints(
+                (r"\[release] ", TITLE_STYLE),
+                ("已取消发布", WARNING_STYLE),
+            )
+            raise typer.Abort()
+
+    if not typer.confirm(f"\n确认推送当前 HEAD 到 {branch} 并触发构建？"):
+        prints(
+            (r"\[release] ", TITLE_STYLE),
+            ("已取消发布", WARNING_STYLE),
+        )
+        raise typer.Abort()
+
+    prints(
+        (r"\[release] ", TITLE_STYLE),
+        ("推送分支...", NORMAL_STYLE),
+    )
+    cmd_run(["git", "push", "origin", f"HEAD:{branch}"])
+
+    prints(
+        (r"\[release] ", TITLE_STYLE),
+        (
+            f"分支 {branch} 推送成功，GitHub Actions 将自动构建并创建 Release Draft",
+            SUCCESSFUL_STYLE,
+        ),
+    )
 
 
 if __name__ == "__main__":

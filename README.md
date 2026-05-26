@@ -18,6 +18,10 @@
 ## 目录结构
 
 ```.
+├── .github
+│   └── workflows                # GitHub Actions 工作流
+│       └── release.yml          # 自动构建与发布工作流
+│
 ├── assets                       # 资源文件夹
 │   ├── icon.ico                 # Windows 图标文件
 │   └── icon.svg                 # Linux 图标文件
@@ -185,6 +189,21 @@ uv run dev.py build
 ```
 
 使用 `pyinstaller` 来构建项目，构建完成后会在 `dist/` 目录下生成可执行文件。
+
+### 发布项目
+
+```bash
+uv run dev.py release
+```
+
+推送 release 分支到 GitHub，触发 CI 自动构建并创建 Release Draft。执行流程：
+
+1. 读取 `pyproject.toml` 中的版本号，生成目标分支名 `release/vX.Y.Z`
+2. 检查工作区是否有未提交的更改
+3. 若远程分支已存在，询问是否强制覆盖
+4. 最终确认后推送 `HEAD` 到远程 release 分支
+
+推送后 GitHub Actions 将自动在 **Windows x64 / ARM64** 和 **Linux x64 / ARM64** 四个平台上构建，并创建包含所有平台构建产物的 Release Draft。
 
 ## 自动运行
 
