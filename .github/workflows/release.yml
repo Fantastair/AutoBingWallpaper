@@ -67,15 +67,13 @@ jobs:
           cp "assets/icon.svg" "release/"
           tar -czf "${ARTIFACT}.tar.gz" -C release "每日bing壁纸" "icon.svg"
 
-      - name: Package artifact (Windows)
+      - name: Rename artifact (Windows)
         if: runner.os == 'Windows'
-        shell: pwsh
+        shell: bash
         run: |
-          $VERSION = "${{ steps.version.outputs.version }}"
-          $ARTIFACT = "AutoBingWallpaper-${VERSION}-${{ matrix.platform }}"
-          New-Item -ItemType Directory -Path release -Force
-          Copy-Item "dist/每日bing壁纸.exe" "release/"
-          Compress-Archive -Path "release/每日bing壁纸.exe" -DestinationPath "${ARTIFACT}.zip"
+          VERSION="${{ steps.version.outputs.version }}"
+          ARTIFACT="AutoBingWallpaper-${VERSION}-${{ matrix.platform }}"
+          mv "dist/每日bing壁纸.exe" "${ARTIFACT}.exe"
 
       - name: Upload artifact
         uses: actions/upload-artifact@v7.0.1
