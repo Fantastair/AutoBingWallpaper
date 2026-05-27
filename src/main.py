@@ -4,11 +4,14 @@ import sys
 import os
 import subprocess
 import platform
+import logging
 from pathlib import Path
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING or sys.platform == "win32":
     import ctypes
+
+import time
 
 import requests
 
@@ -21,10 +24,23 @@ else:
     BASE_DIR = Path(__file__).parent
 
 IMG_TEMP_PATH = BASE_DIR / "temp_wallpaper.jpg"
+LOG_FILE_PATH = BASE_DIR / "wallpaper_log.txt"
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+    handlers=[
+        logging.FileHandler(LOG_FILE_PATH, encoding="utf-8"),
+        logging.StreamHandler(),
+    ],
+)
+logger = logging.getLogger(__name__)
 
 
 def download_wallpaper() -> bytes | None:
     """下载今日壁纸"""
+    logger.info("正在获取壁纸信息...")
 
     resp = requests.get(API_URL, timeout=10)
     resp.raise_for_status()
@@ -32,20 +48,25 @@ def download_wallpaper() -> bytes | None:
 
     images = data.get("images", [])
     if not images:
-        return
+        logger.warning("API 返回的图片列表为空")
+        return None
     img_info = images[0]
     img_url = img_info.get("url")
     if not img_url:
-        return
+        logger.warning("未获取到图片 URL")
+        return None
     if img_url.startswith("/"):
         img_url = BASE_URL + img_url
 
+    logger.info(f"正在下载壁纸: {img_url}")
     try:
         img_resp = requests.get(img_url, timeout=30)
         img_resp.raise_for_status()
+        logger.info("壁纸下载成功")
         return img_resp.content
-    except Exception:
-        return
+    except Exception as e:
+        logger.error(f"壁纸下载失败: {e}")
+        return None
 
 
 def set_wallpaper_linux(file_path: str):
@@ -158,15 +179,36 @@ def set_wallpaper(wallpaper_bytes: bytes):
     tmp_file_path = str(IMG_TEMP_PATH.resolve())
 
     system = platform.system()
+    logger.info(f"正在设置 {system} 壁纸...")
     if system == "Windows":
         set_wallpaper_windows(tmp_file_path)
     elif system == "Linux":
         set_wallpaper_linux(tmp_file_path)
     else:
         raise OSError(f"不支持的操作系统: {system}")
+    logger.info("壁纸设置完成")
 
 
 if __name__ == "__main__":
-    wallpaper_bytes = download_wallpaper()
+    MAX_RETRIES = 5
+    RETRY_DELAY = 5  # 秒
+
+    logger.info("AutoBingWallpaper 启动")
+
+    wallpaper_bytes = None
+    for attempt in range(1, MAX_RETRIES + 1):
+        try:
+            wallpaper_bytes = download_wallpaper()
+            if wallpaper_bytes is not None:
+                break
+        except Exception as e:
+            logger.error(f"第 {attempt} 次下载异常: {e}")
+
+        if attempt < MAX_RETRIES:
+            logger.info(f"第 {attempt} 次失败，{RETRY_DELAY} 秒后重试...")
+            time.sleep(RETRY_DELAY)
+
     if wallpaper_bytes is not None:
         set_wallpaper(wallpaper_bytes)
+    else:
+        logger.error(f"下载壁纸失败，已重试 {MAX_RETRIES} 次")
