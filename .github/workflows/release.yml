@@ -92,6 +92,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
 
       - name: Extract version from branch
         id: version
@@ -126,7 +128,7 @@ jobs:
           # 获取上一个 tag
           PREV_TAG=$(git tag --sort=-v:refname | grep -v "v${{ steps.version.outputs.version }}" | head -1)
 
-          echo "## 🆕 更新内容" > release-body.md
+          echo "## 更新内容" > release-body.md
           echo "" >> release-body.md
 
           if [ -n "$PREV_TAG" ]; then
@@ -134,17 +136,17 @@ jobs:
             echo "" >> release-body.md
 
             # 分类输出 commits
-            echo "### ✨ 新功能" >> release-body.md
+            echo "### 新功能" >> release-body.md
             git log "${PREV_TAG}..HEAD" --pretty=format:"- %s (%h)" --grep="^feat" --no-merges >> release-body.md || echo "- 无" >> release-body.md
             echo "" >> release-body.md
             echo "" >> release-body.md
 
-            echo "### 🐛 修复" >> release-body.md
+            echo "### 修复" >> release-body.md
             git log "${PREV_TAG}..HEAD" --pretty=format:"- %s (%h)" --grep="^fix" --no-merges >> release-body.md || echo "- 无" >> release-body.md
             echo "" >> release-body.md
             echo "" >> release-body.md
 
-            echo "### 🔧 其他" >> release-body.md
+            echo "### 其他" >> release-body.md
             git log "${PREV_TAG}..HEAD" --pretty=format:"- %s (%h)" --grep="^\(chore\|refactor\|docs\|style\|perf\|ci\|test\|build\)" --no-merges >> release-body.md || echo "- 无" >> release-body.md
           else
             echo "**首个正式版本**" >> release-body.md
@@ -155,14 +157,14 @@ jobs:
           echo "" >> release-body.md
           echo "---" >> release-body.md
           echo "" >> release-body.md
-          echo "## 📥 下载" >> release-body.md
+          echo "## 下载" >> release-body.md
           echo "" >> release-body.md
           echo "| 平台 | 文件 |" >> release-body.md
-          echo "|------|------|" >> release-body.md
-          echo "| 🐧 Linux x64 | \`AutoBingWallpaper-\${{ steps.version.outputs.version }}-linux-x64.tar.gz\` |" >> release-body.md
-          echo "| 🐧 Linux ARM64 | \`AutoBingWallpaper-\${{ steps.version.outputs.version }}-linux-arm64.tar.gz\` |" >> release-body.md
-          echo "| 🪟 Windows x64 | \`AutoBingWallpaper-\${{ steps.version.outputs.version }}-windows-x64.exe\` |" >> release-body.md
-          echo "| 🪟 Windows ARM64 | \`AutoBingWallpaper-\${{ steps.version.outputs.version }}-windows-arm64.exe\` |" >> release-body.md
+          echo "| ---- | ---- |" >> release-body.md
+          echo "| Linux x64 | [AutoBingWallpaper-${{ steps.version.outputs.version }}-linux-x64.tar.gz](https://github.com/\${{ github.repository }}/releases/download/v\${{ steps.version.outputs.version }}/AutoBingWallpaper-\${{ steps.version.outputs.version }}-linux-x64.tar.gz) |" >> release-body.md
+          echo "| Linux ARM64 | [AutoBingWallpaper-${{ steps.version.outputs.version }}-linux-arm64.tar.gz](https://github.com/\${{ github.repository }}/releases/download/v\${{ steps.version.outputs.version }}/AutoBingWallpaper-\${{ steps.version.outputs.version }}-linux-arm64.tar.gz) |" >> release-body.md
+          echo "| Windows x64 | [AutoBingWallpaper-${{ steps.version.outputs.version }}-windows-x64.exe](https://github.com/\${{ github.repository }}/releases/download/v\${{ steps.version.outputs.version }}/AutoBingWallpaper-\${{ steps.version.outputs.version }}-windows-x64.exe) |" >> release-body.md
+          echo "| Windows ARM64 | [AutoBingWallpaper-${{ steps.version.outputs.version }}-windows-arm64.exe](https://github.com/\${{ github.repository }}/releases/download/v\${{ steps.version.outputs.version }}/AutoBingWallpaper-\${{ steps.version.outputs.version }}-windows-arm64.exe) |" >> release-body.md
 
       - name: Create Release Draft
         uses: softprops/action-gh-release@v3.0.0
