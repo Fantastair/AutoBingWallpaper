@@ -16,7 +16,18 @@ import time
 import requests
 
 BASE_URL = "https://cn.bing.com"
-API_URL = "https://global.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1&uhd=1&uhdwidth=3840&uhdheight=2160&setmkt=zh-CN&setlang=en"
+API_URL = "https://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1&uhd=1&uhdwidth=3840&uhdheight=2160&setmkt=zh-CN&setlang=en"
+
+# 请求头，模拟浏览器访问
+HEADERS = {
+    "User-Agent": (
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+        "AppleWebKit/537.36 (KHTML, like Gecko) "
+        "Chrome/125.0.0.0 Safari/537.36 Edg/125.0.0.0"
+    ),
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+    "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8",
+}
 
 if getattr(sys, "frozen", False):
     BASE_DIR = Path(sys.executable).parent
@@ -40,9 +51,12 @@ logger = logging.getLogger(__name__)
 
 def download_wallpaper() -> bytes | None:
     """下载今日壁纸"""
+    session = requests.Session()
+    session.headers.update(HEADERS)
+
     logger.info("正在获取壁纸信息...")
 
-    resp = requests.get(API_URL, timeout=10)
+    resp = session.get(API_URL, timeout=10)
     resp.raise_for_status()
     data = resp.json()
 
@@ -60,7 +74,7 @@ def download_wallpaper() -> bytes | None:
 
     logger.info(f"正在下载壁纸: {img_url}")
     try:
-        img_resp = requests.get(img_url, timeout=30)
+        img_resp = session.get(img_url, timeout=30)
         img_resp.raise_for_status()
         logger.info("壁纸下载成功")
         return img_resp.content

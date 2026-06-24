@@ -221,3 +221,7 @@ __marimo__/
 
 # Temporary wallpaper file
 temp_wallpaper.jpg
+
+# Runtime files
+wallpaper_log.txt
+temp_wallpaper.jpg
